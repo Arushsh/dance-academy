@@ -4,6 +4,7 @@ const router = express.Router();
 const courses = [
     {
         id: 1, name: 'Classical Dance', type: 'Classical', emoji: '🪷',
+        image: '/courses/classical.png',
         description: 'Master the grace and precision of classical Indian dance forms including Bharatanatyam and Kathak.',
         trainer: 'Guru Priya Sharma', experience: '15 years', level: 'Beginner to Advanced',
         duration: '6 months', batchTimings: ['7:00 AM - 8:00 AM', '5:00 PM - 6:00 PM', '6:00 PM - 7:00 PM'],
@@ -13,6 +14,7 @@ const courses = [
     },
     {
         id: 2, name: 'Bollywood Dance', type: 'Bollywood', emoji: '🎬',
+        image: '/courses/bollywood.png',
         description: 'Learn the vibrant and energetic dance style inspired by Bollywood films. Great for all ages!',
         trainer: 'Neha Kapoor', experience: '10 years', level: 'Beginner to Intermediate',
         duration: '3 months', batchTimings: ['8:00 AM - 9:00 AM', '4:00 PM - 5:00 PM', '7:00 PM - 8:00 PM'],
@@ -22,6 +24,7 @@ const courses = [
     },
     {
         id: 3, name: 'Hip-Hop Dance', type: 'Hip-Hop', emoji: '🎤',
+        image: '/courses/hiphop.png',
         description: 'Dive into the world of Hip-Hop with breaking, locking, popping and freestyle movements.',
         trainer: 'Arjun Mehta', experience: '8 years', level: 'Beginner to Advanced',
         duration: '4 months', batchTimings: ['9:00 AM - 10:00 AM', '5:30 PM - 6:30 PM', '7:30 PM - 8:30 PM'],
@@ -31,6 +34,7 @@ const courses = [
     },
     {
         id: 4, name: 'Contemporary Dance', type: 'Contemporary', emoji: '🌊',
+        image: '/courses/contemporary.png',
         description: 'Explore fluid movements and artistic expression in contemporary dance. A fusion of multiple styles.',
         trainer: 'Riya Desai', experience: '12 years', level: 'Intermediate to Advanced',
         duration: '5 months', batchTimings: ['6:00 AM - 7:00 AM', '6:30 PM - 7:30 PM', '8:00 PM - 9:00 PM'],
