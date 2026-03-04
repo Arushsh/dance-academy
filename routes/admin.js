@@ -98,12 +98,13 @@ router.get('/payments', adminAuth, async (req, res) => {
     }
 });
 
-// @route POST /api/admin/payments
+// @route POST /api/admin/payments — Create a fee record for a student
 router.post('/payments', adminAuth, async (req, res) => {
     try {
         const payment = new Payment(req.body);
         await payment.save();
-        res.status(201).json({ message: 'Payment record created!', payment });
+        const populated = await Payment.findById(payment._id).populate('student', 'name email danceType batchTiming');
+        res.status(201).json({ message: 'Payment record created!', payment: populated });
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
@@ -119,12 +120,73 @@ router.put('/payments/:id', adminAuth, async (req, res) => {
     }
 });
 
-// @route POST /api/admin/attendance
+// @route DELETE /api/admin/payments/:id
+router.delete('/payments/:id', adminAuth, async (req, res) => {
+    try {
+        await Payment.findByIdAndDelete(req.params.id);
+        res.json({ message: 'Payment record deleted' });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+});
+
+// @route GET /api/admin/attendance — All attendance records
+router.get('/attendance', adminAuth, async (req, res) => {
+    try {
+        const filter = {};
+        if (req.query.studentId) filter.student = req.query.studentId;
+        if (req.query.date) {
+            const d = new Date(req.query.date);
+            d.setHours(0, 0, 0, 0);
+            const end = new Date(d); end.setHours(23, 59, 59, 999);
+            filter.date = { $gte: d, $lte: end };
+        }
+        const records = await Attendance.find(filter)
+            .populate('student', 'name email danceType batchTiming')
+            .populate('markedBy', 'name')
+            .sort({ date: -1 })
+            .limit(200);
+        res.json(records);
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+});
+
+// @route POST /api/admin/attendance — Mark attendance
 router.post('/attendance', adminAuth, async (req, res) => {
     try {
-        const attendance = new Attendance({ ...req.body, markedBy: req.user._id });
+        const { student, date, status, danceType, batchTiming } = req.body;
+        // Prevent duplicate: same student + same date
+        const d = new Date(date);
+        d.setHours(0, 0, 0, 0);
+        const end = new Date(d); end.setHours(23, 59, 59, 999);
+        const existing = await Attendance.findOne({ student, date: { $gte: d, $lte: end } });
+        if (existing) {
+            // Update existing
+            existing.status = status || existing.status;
+            existing.markedBy = req.user._id;
+            await existing.save();
+            const populated = await Attendance.findById(existing._id)
+                .populate('student', 'name email danceType batchTiming')
+                .populate('markedBy', 'name');
+            return res.json({ message: 'Attendance updated!', attendance: populated });
+        }
+        const attendance = new Attendance({ student, date, status, danceType, batchTiming, markedBy: req.user._id });
         await attendance.save();
-        res.status(201).json({ message: 'Attendance marked!', attendance });
+        const populated = await Attendance.findById(attendance._id)
+            .populate('student', 'name email danceType batchTiming')
+            .populate('markedBy', 'name');
+        res.status(201).json({ message: 'Attendance marked!', attendance: populated });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+});
+
+// @route DELETE /api/admin/attendance/:id
+router.delete('/attendance/:id', adminAuth, async (req, res) => {
+    try {
+        await Attendance.findByIdAndDelete(req.params.id);
+        res.json({ message: 'Attendance record deleted' });
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
